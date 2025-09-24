@@ -83,13 +83,17 @@ else
   #  sudo chmod 0700 -R /var/www/html/postgresql/17/main
   #
   #== Start the postgresql service.
+  echo 'Starting PostgreSQL service.'
   sudo service postgresql start
   #== Create the user.
+  echo 'Creating PostgreSQL user.'
   sudo su postgres -c "psql -c \"CREATE ROLE db WITH LOGIN PASSWORD 'db';\""
   #== Create the database.
+  echo 'Creating PostgreSQL database.'
   sudo su postgres -c "psql -c \"CREATE DATABASE db WITH OWNER db ENCODING 'UTF8' LC_COLLATE='C' LC_CTYPE='C' TEMPLATE template0;\""
   #== Enable pgvector extension.
-  sudo su postgres -c "psql -d db -c \"CREATE EXTENSION IF NOT EXISTS vector;\""
+  echo 'Enabling pgvector extension.'
+  sudo su postgres -c "psql -d db -c \"CREATE EXTENSION IF NOT EXISTS vector with SCHEMA public;\""
   #else
   #  echo 'PostgreSQL is already installed - starting.'
   #  sudo service postgresql start

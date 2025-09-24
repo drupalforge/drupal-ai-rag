@@ -31,12 +31,18 @@ fi
 #== Import vector files
 if [[ -f "$APP_ROOT/.devpanel/dumps/pgvector.sql.gz" ]]; then
   # Make sure to create the extension before importing the SQL file.
-  PGPASSWORD="db" psql --quiet --host=$PG_HOST --username=db -d db -c "CREATE EXTENSION IF NOT EXISTS vector;"
+  PGPASSWORD="db" psql --quiet --host=$PG_HOST --username=db -d db -c "CREATE EXTENSION IF NOT EXISTS vector with SCHEMA public;"
   # Extract the pgvector.sql.gz file
   sudo gunzip -c "$APP_ROOT/.devpanel/dumps/pgvector.sql.gz" > "$APP_ROOT/.devpanel/dumps/pgvector.sql"
-  PGPASSWORD="db" psql --quiet --host=$PG_HOST --username=db -d db -f "$APP_ROOT/.devpanel/dumps/pgvector.sql"
-  # Remove the extracted file
-  # sudo rm -rf $APP_ROOT/.devpanel/dumps/pgvector.sql
+  
+  # Filter out extension creation commands from the dump and import data only
+  grep -v "CREATE EXTENSION" "$APP_ROOT/.devpanel/dumps/pgvector.sql" | grep -v "COMMENT ON EXTENSION" > "$APP_ROOT/.devpanel/dumps/pgvector_filtered.sql"
+  
+  # Import the filtered SQL file
+  PGPASSWORD="db" psql --quiet --host=$PG_HOST --username=db -d db -f "$APP_ROOT/.devpanel/dumps/pgvector_filtered.sql"
+  
+  # Clean up temporary files
+  sudo rm -f "$APP_ROOT/.devpanel/dumps/pgvector.sql" "$APP_ROOT/.devpanel/dumps/pgvector_filtered.sql"
 fi
 
 if [[ -n "$DB_SYNC_VOL" ]]; then

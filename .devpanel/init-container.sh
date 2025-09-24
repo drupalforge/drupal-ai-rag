@@ -26,17 +26,17 @@ if [[ $(mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME -e "show 
     echo  'Import mysql file ...'
     drush sqlq --file="$APP_ROOT/.devpanel/dumps/db.sql.gz" --file-delete
   fi
+fi
 
-  #== Import vector files
-  if [[ -f "$APP_ROOT/.devpanel/dumps/pgvector.sql.gz" ]]; then
-    # Make sure to create the extension before importing the SQL file.
-    PGPASSWORD="db" psql --quiet --host=$PG_HOST --username=db -d db -c "CREATE EXTENSION IF NOT EXISTS vector;"
-    # Extract the pgvector.sql.gz file
-    sudo gunzip -c "$APP_ROOT/.devpanel/dumps/pgvector.sql.gz" > "$APP_ROOT/.devpanel/dumps/pgvector.sql"
-    PGPASSWORD="db" psql --quiet --host=$PG_HOST --username=db -d db -f "$APP_ROOT/.devpanel/dumps/pgvector.sql"
-    # Remove the extracted file
-    sudo rm -rf $APP_ROOT/.devpanel/dumps/pgvector.sql
-  fi
+#== Import vector files
+if [[ -f "$APP_ROOT/.devpanel/dumps/pgvector.sql.gz" ]]; then
+  # Make sure to create the extension before importing the SQL file.
+  PGPASSWORD="db" psql --quiet --host=$PG_HOST --username=db -d db -c "CREATE EXTENSION IF NOT EXISTS vector;"
+  # Extract the pgvector.sql.gz file
+  sudo gunzip -c "$APP_ROOT/.devpanel/dumps/pgvector.sql.gz" > "$APP_ROOT/.devpanel/dumps/pgvector.sql"
+  PGPASSWORD="db" psql --quiet --host=$PG_HOST --username=db -d db -f "$APP_ROOT/.devpanel/dumps/pgvector.sql"
+  # Remove the extracted file
+  # sudo rm -rf $APP_ROOT/.devpanel/dumps/pgvector.sql
 fi
 
 if [[ -n "$DB_SYNC_VOL" ]]; then
